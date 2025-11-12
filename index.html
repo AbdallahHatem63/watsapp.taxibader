@@ -63,6 +63,20 @@
     overflow:auto;
     background: rgba(0,0,0,0.05);
   }
+.send-btn {
+  padding: 6px 12px;
+  background: var(--accent);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+.send-btn:hover {
+  background: #1eb955;
+}
+
   .composer{
     height:50px;
     display:flex;
@@ -128,7 +142,10 @@
   <main class="chat"></main>
   <div class="composer">
     <div class="micro"></div>
-    <div class="input"><input placeholder="اكتب رسالة" /></div>
+<div class="input">
+  <input placeholder="اكتب رسالة" />
+  <button class="send-btn">إرسال</button>
+</div>
   </div>
   <footer>
     لا تعتبر هذه النسخة النهائية للمستخدم<br>
@@ -156,6 +173,7 @@
   <div class="composer">
     <div class="micro"></div>
     <div class="input"><input placeholder="اكتب رسالة" /></div>
+  <button class="send-btn">إرسال</button>
   </div>
   <footer>
     لا تعتبر هذه النسخة النهائية للمستخدم<br>
@@ -167,7 +185,6 @@
     </div>
   </footer>
 </div>
-
 <script>
 const app1 = document.querySelectorAll('.app')[0];
 const app2 = document.querySelectorAll('.app')[1];
@@ -178,6 +195,14 @@ const chat2 = app2.querySelector('.chat');
 const input1 = app1.querySelector('input');
 const input2 = app2.querySelector('input');
 
+const btn1 = app1.querySelector('.send-btn');
+const btn2 = app2.querySelector('.send-btn');
+
+let state1 = 'start'; 
+let complaintDesc='', complaintClient='', complaintCaptain='';
+let tempTripNumber='';
+
+// دالة لإضافة الرسائل
 function addMessage(chat, text, sender='user') {
     const msg = document.createElement('div');
     msg.textContent = text;
@@ -187,6 +212,7 @@ function addMessage(chat, text, sender='user') {
     msg.style.maxWidth = '80%';
     msg.style.color = '#fff';
     msg.style.wordBreak = 'break-word';
+    msg.style.display = 'inline-block';
     if(sender==='user'){
         msg.style.background = '#25D366';
         msg.style.alignSelf = 'flex-end';
@@ -201,15 +227,13 @@ function addMessage(chat, text, sender='user') {
 // رسالة ترحيبية
 addMessage(chat1, "أهلا بك في خدمة تاكسي بدر، اكتب 1 للرحلة، 2 لتعريف الرحلات، 0 لتقديم شكوى", 'bot');
 
-let state1 = 'start'; 
-let complaintDesc='', complaintClient='', complaintCaptain='';
-let tempTripNumber='';
+// دالة إرسال الرسالة (للزرار و Enter)
+function handleSend(input, chat) {
+    if(input.value.trim() === '') return;
+    const val = input.value.trim();
+    addMessage(chat, val, 'user');
 
-input1.addEventListener('keydown',(e)=>{
-    if(e.key==='Enter' && input1.value.trim()!==''){
-        const val = input1.value.trim();
-        addMessage(chat1,val,'user');
-
+    if(chat === chat1){
         if(state1==='start'){
             addMessage(chat1,'أهلا بك','bot');
             state1='askedPlace';
@@ -258,16 +282,7 @@ input1.addEventListener('keydown',(e)=>{
             addMessage(chat2,`العميل ${complaintClient} بيشتكي من الكابتن ${complaintCaptain}، نوع الشكوى: ${complaintDesc}`,'bot');
             state1='done';
         }
-
-        input1.value='';
-    }
-});
-
-input2.addEventListener('keydown',(e)=>{
-    if(e.key==='Enter' && input2.value.trim()!==''){
-        const val = input2.value.trim();
-        addMessage(chat2,val,'user');
-
+    } else { // app2
         if(val.toLowerCase()==='قبول'){
             addMessage(chat1, `كابتن محمد قبل رحلتك. كابتن محمد جاي في الطريق`, 'bot');
         }
@@ -275,9 +290,21 @@ input2.addEventListener('keydown',(e)=>{
             addMessage(chat1,'تم إلغاء الرحلة','bot');
             addMessage(chat2,`تم إلغاء الرحلة: رقم العميل ${tempTripNumber}`,'bot');
         }
-
-        input2.value='';
     }
+
+    input.value = '';
+}
+
+// ربط الزرار بالوظيفة
+btn1.addEventListener('click', ()=> handleSend(input1, chat1));
+btn2.addEventListener('click', ()=> handleSend(input2, chat2));
+
+// ربط Enter بنفس الوظيفة
+input1.addEventListener('keydown', (e)=>{
+    if(e.key==='Enter') handleSend(input1, chat1);
+});
+input2.addEventListener('keydown', (e)=>{
+    if(e.key==='Enter') handleSend(input2, chat2);
 });
 </script>
 </body>
